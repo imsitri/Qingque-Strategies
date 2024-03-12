@@ -90,7 +90,7 @@ def run_all_strategies(rounds_per_iteration, iteration):
 
 
 if __name__ == '__main__':
-    run_all_strategies(rounds_per_iteration= 6, iteration= 1000)
+    run_all_strategies(rounds_per_iteration= 10, iteration= 1000)
 
 
 

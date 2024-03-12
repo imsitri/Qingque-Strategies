@@ -90,7 +90,12 @@ class Qingque:
     def skill(self):
         if prob.hand_check(self.hand) == 4:
             return
-        self.add_status_effect(Buff("DMG%", 0.308, 1))
+        skill_counter = 0
+        for effect in self.status_effect:
+            if effect.type == "DMG%" and effect.value == 0.308:
+                skill_counter +=1
+        if skill_counter < 4:
+            self.add_status_effect(Buff("DMG%", 0.308, 1))
         self.energy+= 2
         self.hand = prob.skill(self.hand)
         autarky = np.random.choice([1,2,3,4], 1)
