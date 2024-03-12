@@ -54,8 +54,8 @@ def one_of_a_kind_averse(current_SP, qingque, enemy_count = 1, action_dict = Non
     if prob.hand_check(qingque.hand) > 1:
         if current_SP >= 1 and prob.hand_check(qingque.hand) != 4:
             return Action.SKILL
-        if qingque.energy >= 140:
-            return Action.ULT
+    if qingque.energy >= 140:
+        return Action.ULT
     return Action.BASIC
 
 

@@ -81,7 +81,7 @@ def run_all_strategies(rounds_per_iteration, iteration):
                 init = prob.hand_sampling(1,1)
                 init = prob.draw(init)
                 performance[f"Iteration {i}"] = battle_no_Sparkle(log_file=log, rounds=rounds_per_iteration, 
-                                                                      strategy=val, sp_source=1, init_hand= init)
+                                                                      strategy=val, sp_source=2, init_hand= init)
             sum_helper = 0
             for key in performance.keys():
                 sum_helper+= sum(performance[key].values())/rounds_per_iteration
@@ -90,7 +90,7 @@ def run_all_strategies(rounds_per_iteration, iteration):
 
 
 if __name__ == '__main__':
-    run_all_strategies(rounds_per_iteration= 6, iteration= 100)
+    run_all_strategies(rounds_per_iteration= 6, iteration= 1000)
 
 
 
