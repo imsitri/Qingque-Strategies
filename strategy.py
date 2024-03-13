@@ -13,6 +13,26 @@ class Action(Enum):
     ULT = 3
     END = 4
 
+def gray_strategy(current_SP, qingque, enemy_count = 1, action_dict = None):
+    #SP -> tile -> n_of_a_kind
+    strat_dict = {
+        1: {1: {1:Action.BASIC}, 2: {1: Action.BASIC, 2: Action.BASIC}, 3: {1: Action.BASIC, 2: Action.BASIC, 3: Action.BASIC}, 4: {1: Action.BASIC, 2: Action.BASIC, 3: Action.BASIC, 4: Action.BASIC}}, 
+        2: {1: {1:Action.BASIC}, 2: {1: Action.BASIC, 2: Action.BASIC}, 3: {1: Action.BASIC, 2: Action.SKILL, 3: Action.SKILL}, 4: {1: Action.SKILL, 2: Action.SKILL, 3: Action.SKILL, 4: Action.BASIC}},
+        3: {1: {1:Action.BASIC}, 2: {1: Action.SKILL, 2: Action.SKILL}, 3: {1: Action.SKILL, 2: Action.SKILL, 3: Action.SKILL}, 4: {1: Action.SKILL, 2: Action.SKILL, 3: Action.SKILL, 4: Action.BASIC}},
+        4: {1: {1:Action.SKILL}, 2: {1: Action.SKILL, 2: Action.SKILL}, 3: {1: Action.SKILL, 2: Action.SKILL, 3: Action.SKILL}, 4: {1: Action.SKILL, 2: Action.SKILL, 3: Action.SKILL, 4: Action.BASIC}},
+        5: {1: {1:Action.SKILL}, 2: {1: Action.SKILL, 2: Action.SKILL}, 3: {1: Action.SKILL, 2: Action.SKILL, 3: Action.SKILL}, 4: {1: Action.SKILL, 2: Action.SKILL, 3: Action.SKILL, 4: Action.BASIC}},
+        6: {1: {1:Action.SKILL}, 2: {1: Action.SKILL, 2: Action.SKILL}, 3: {1: Action.SKILL, 2: Action.SKILL, 3: Action.SKILL}, 4: {1: Action.SKILL, 2: Action.SKILL, 3: Action.SKILL, 4: Action.BASIC}},
+        7: {1: {1:Action.SKILL}, 2: {1: Action.SKILL, 2: Action.SKILL}, 3: {1: Action.SKILL, 2: Action.SKILL, 3: Action.SKILL}, 4: {1: Action.SKILL, 2: Action.SKILL, 3: Action.SKILL, 4: Action.BASIC}}}
+    if len(action_dict[list(action_dict.keys())[-1]]) > 0 and action_dict[list(action_dict.keys())[-1]][-1] == Action.BASIC:
+        return Action.END
+    decision = strat_dict[int(current_SP)][len(qingque.hand)][prob.hand_check(qingque.hand)]
+    if decision == Action.BASIC and qingque.energy >=140:
+        return Action.ULT
+    else:
+        return decision
+
+    
+
 def skill_spam_fold_at_5(current_SP, qingque, enemy_count = 1, action_dict = None):
     if len(action_dict[list(action_dict.keys())[-1]]) > 0 and action_dict[list(action_dict.keys())[-1]][-1] == Action.BASIC:
         return Action.END

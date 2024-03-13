@@ -80,9 +80,10 @@ def battle_no_Sparkle(log_file ,rounds, strategy, sp_source = 2, init_hand = Non
     log_file.write(f"Total SP expenditure across {rounds} turns: {sum(sp_dict.values()):0.2f}. Average: {sum(sp_dict.values())/rounds :0.2f}\n\n")
     return dmg_dict, sp_dict
 
-def run_all_strategies(rounds_per_iteration, iteration):
+def run_all_strategies(rounds_per_iteration, iteration, sp= 1.5):
     f = open("log/report.txt", "w")
     r = open("log/rankings.txt", "w")
+    r.write(f"{rounds_per_iteration} Qingque turn per iteration. {iteration} iterations. {sp} SP source per Qingque turn\n\n")
     ranking = {}
     for name, val in strat.__dict__.items():
         if callable(val) and name not in ["Enum", "Action"]:
@@ -97,7 +98,7 @@ def run_all_strategies(rounds_per_iteration, iteration):
                 init = prob.hand_sampling(1,1)
                 init = prob.draw(init)
                 damage_performance[f"Iteration {i}"], sp_performance[f"Iteration {i}"] = battle_no_Sparkle(log_file=log, rounds=rounds_per_iteration, 
-                                                                      strategy=val, sp_source=1.5, init_hand= init)
+                                                                      strategy=val, sp_source=sp, init_hand= init)
             dmg_list = []
             sp_list = []
             for key in damage_performance.keys():
@@ -132,7 +133,7 @@ def run_all_strategies(rounds_per_iteration, iteration):
 
 
 if __name__ == '__main__':
-    run_all_strategies(rounds_per_iteration= 6, iteration= 10000)
+    run_all_strategies(rounds_per_iteration= 6, iteration= 1000, sp = 1.5)
 
 
 
