@@ -2,6 +2,7 @@ import qingque_class as qq
 import qingque_probability as prob
 import strategy as strat
 import numpy as np
+from tqdm import tqdm
 
 def battle_no_Sparkle(log_file ,rounds, strategy, sp_source = 2, init_hand = None, enemy_count = 1):
     # logging battle data
@@ -80,12 +81,17 @@ def battle_no_Sparkle(log_file ,rounds, strategy, sp_source = 2, init_hand = Non
     return dmg_dict, sp_dict
 
 def run_all_strategies(rounds_per_iteration, iteration):
+    f = open("log/report.txt", "w")
+    r = open("log/rankings.txt", "w")
+    ranking = {}
     for name, val in strat.__dict__.items():
         if callable(val) and name not in ["Enum", "Action"]:
+            ranking[name] = []
             damage_performance = {}
             sp_performance = {}
             log = open("log/"+val.__name__ + ".txt", "w")
-            for i in range(iteration):
+            print(f"{name}:")
+            for i in tqdm(range(iteration)):
                 log.write(f"Iteration {i}:")
                 # technique
                 init = prob.hand_sampling(1,1)
@@ -97,17 +103,36 @@ def run_all_strategies(rounds_per_iteration, iteration):
             for key in damage_performance.keys():
                 dmg_list.append(sum(damage_performance[key].values())/rounds_per_iteration)
                 sp_list.append(sum(sp_performance[key].values())/rounds_per_iteration)
-            print(f"Damage/round of {name}: {sum(dmg_list)/iteration:0.2f}")
-            print(f"Damage stdev between iterations of {name}: {np.std(dmg_list):0.2f}")
-            print(f"SP/round of {name}: {sum(sp_list)/iteration:0.2f}")
-            print(f"SP stdev between iterations of {name}: {np.std(sp_list):0.2f}")
-            print()
+            # print(f"Damage/round of {name}: {sum(dmg_list)/iteration:0.2f}")
+            # print(f"Damage stdev between iterations of {name}: {np.std(dmg_list):0.2f}")
+            # print(f"SP/round of {name}: {sum(sp_list)/iteration:0.2f}")
+            # print(f"SP stdev between iterations of {name}: {np.std(sp_list):0.2f}")
+            # print()
+            ranking[name].append(sum(dmg_list)/iteration)
+            ranking[name].append(sum(sp_list)/iteration)
+            ranking[name].append(np.std(dmg_list))
+            ranking[name].append(np.std(sp_list))
+
+            f.write(f"Damage/round of {name}: {sum(dmg_list)/iteration:0.2f}\n")
+            f.write(f"Damage stdev between iterations of {name}: {np.std(dmg_list):0.2f}\n")
+            f.write(f"SP/round of {name}: {sum(sp_list)/iteration:0.2f}\n")
+            f.write(f"SP stdev between iterations of {name}: {np.std(sp_list):0.2f}\n")
+            f.write("\n")
             
             log.close()
+    f.close()
+    r.write("Mean DMG rankings:\n")
+    for key, value in sorted(ranking.items(), key=lambda e: e[1][0], reverse=True):
+        r.write(f"{key} : {value[0]:0.2f} - STDEV: {value[2]:0.2f}\n")
+
+    r.write("\nMean SP consumption rankings:\n")
+    for key, value in sorted(ranking.items(), key=lambda e: e[1][1], reverse=True):
+        r.write(f"{key} : {value[1]:0.2f} - STDEV: {value[3]:0.2f}\n")
+    r.close()
 
 
 if __name__ == '__main__':
-    run_all_strategies(rounds_per_iteration= 6, iteration= 1000)
+    run_all_strategies(rounds_per_iteration= 6, iteration= 10000)
 
 
 
