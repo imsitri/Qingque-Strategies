@@ -1,6 +1,7 @@
 import qingque_class as qq
 import qingque_probability as prob
 import strategy as strat
+import numpy as np
 
 def battle_no_Sparkle(log_file ,rounds, strategy, sp_source = 2, init_hand = None, enemy_count = 1):
     # logging battle data
@@ -12,6 +13,7 @@ def battle_no_Sparkle(log_file ,rounds, strategy, sp_source = 2, init_hand = Non
     qingque = qq.Qingque(hand)
     log_file.write(f"Qingque's initial hand: {qingque.hand}\n")
     dmg_dict = {}
+    sp_dict = {}
     action_dict = {}
     sp = 0
     for round in range(rounds):
@@ -19,6 +21,7 @@ def battle_no_Sparkle(log_file ,rounds, strategy, sp_source = 2, init_hand = Non
         log_file.write(f"Turn {round + 1}:\n")
         sp = min(5, sp+sp_source)
         dmg_dict[f"Turn {round + 1}"] = 0
+        sp_dict[f"Turn {round + 1}"] = 0
         log_file.write(f"Other teammates supply {sp_source} SP. Current SP: {sp}\n")
         while True:
             decision = strategy(sp, qingque, enemy_count, action_dict)
@@ -33,6 +36,7 @@ def battle_no_Sparkle(log_file ,rounds, strategy, sp_source = 2, init_hand = Non
                 action_dict[round].append(strat.Action.ULT)
             if decision == strat.Action.SKILL:
                 sp -=1
+                sp_dict[f"Turn {round + 1}"] -= 1
                 qingque.skill()
                 if (qingque.autarky == 1):
                     log_file.write("Autarky procced!\n")
@@ -42,11 +46,13 @@ def battle_no_Sparkle(log_file ,rounds, strategy, sp_source = 2, init_hand = Non
             if decision == strat.Action.BASIC:
                 if (prob.hand_check(qingque.hand) != 4):
                     sp = min(5, sp+1)
+                    sp_dict[f"Turn {round + 1}"] += 1
                     log_file.write(f"Qingque regain SP from non enhanced Basic. Current SP: {sp}\n")
                     dmg = qingque.attack(enemy_count)
                     log_file.write(f"Qingque uses non enhanced Basic, does {dmg} DMG.\n")
                 else:
                     sp = min(5, sp+1)
+                    sp_dict[f"Turn {round + 1}"] += 1
                     log_file.write(f"Qingque regain SP from E6. Current SP: {sp}\n")
                     dmg = qingque.attack(enemy_count)
                     log_file.write(f"Qingque uses Cherry On Top, does {dmg} DMG.\n")
@@ -67,30 +73,41 @@ def battle_no_Sparkle(log_file ,rounds, strategy, sp_source = 2, init_hand = Non
     log_file.write("Combat report:\n")
     for key in dmg_dict.keys():
         log_file.write(f"{key} total damage: {dmg_dict[key]}\n")
-    log_file.write(f"Total across {rounds} turns: {sum(dmg_dict.values()):0.2f}. Average: {sum(dmg_dict.values())/rounds :0.2f}\n\n")
-    return dmg_dict
+    for key in sp_dict.keys():
+        log_file.write(f"{key} total SP net expenditure: {sp_dict[key]}\n")
+    log_file.write(f"Total damage across {rounds} turns: {sum(dmg_dict.values()):0.2f}. Average: {sum(dmg_dict.values())/rounds :0.2f}\n\n")
+    log_file.write(f"Total SP expenditure across {rounds} turns: {sum(sp_dict.values()):0.2f}. Average: {sum(sp_dict.values())/rounds :0.2f}\n\n")
+    return dmg_dict, sp_dict
 
 def run_all_strategies(rounds_per_iteration, iteration):
     for name, val in strat.__dict__.items():
         if callable(val) and name not in ["Enum", "Action"]:
-            performance = {}
+            damage_performance = {}
+            sp_performance = {}
             log = open("log/"+val.__name__ + ".txt", "w")
             for i in range(iteration):
                 log.write(f"Iteration {i}:")
                 # technique
                 init = prob.hand_sampling(1,1)
                 init = prob.draw(init)
-                performance[f"Iteration {i}"] = battle_no_Sparkle(log_file=log, rounds=rounds_per_iteration, 
-                                                                      strategy=val, sp_source=2, init_hand= init)
-            sum_helper = 0
-            for key in performance.keys():
-                sum_helper+= sum(performance[key].values())/rounds_per_iteration
-            print(f"Damage/round of {name}: {sum_helper/iteration:0.2f}")
+                damage_performance[f"Iteration {i}"], sp_performance[f"Iteration {i}"] = battle_no_Sparkle(log_file=log, rounds=rounds_per_iteration, 
+                                                                      strategy=val, sp_source=1.5, init_hand= init)
+            dmg_list = []
+            sp_list = []
+            for key in damage_performance.keys():
+                dmg_list.append(sum(damage_performance[key].values())/rounds_per_iteration)
+                sp_list.append(sum(sp_performance[key].values())/rounds_per_iteration)
+            print(f"Damage/round of {name}: {sum(dmg_list)/iteration:0.2f}")
+            print(f"Damage stdev between iterations of {name}: {np.std(dmg_list):0.2f}")
+            print(f"SP/round of {name}: {sum(sp_list)/iteration:0.2f}")
+            print(f"SP stdev between iterations of {name}: {np.std(sp_list):0.2f}")
+            print()
+            
             log.close()
 
 
 if __name__ == '__main__':
-    run_all_strategies(rounds_per_iteration= 10, iteration= 1000)
+    run_all_strategies(rounds_per_iteration= 6, iteration= 1000)
 
 
 

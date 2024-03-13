@@ -175,7 +175,7 @@ def multiprocess():
         jobs = []
         for tile_count in range(1,5):
             for n_kind in range(1,5):
-                for skill_count in range(8):
+                for skill_count in range(10):
                     if (tile_count == 4 and n_kind == 1) or tile_count < n_kind:
                         continue
                     else:
@@ -186,11 +186,11 @@ def multiprocess():
             p.join()
         
         result_dict = dict(result_dict)
-        json.dump(result_dict, open("qingque/qingque_skill_probability.json", "w"))
+        json.dump(result_dict, open("qingque_skill_probability.json", "w"))
         print("Probability by key:")
         for tile_count in range(1,5):
             for n_kind in range(1,5):
-                for skill_count in range(8):
+                for skill_count in range(10):
                     if (tile_count == 4 and n_kind == 1) or tile_count < n_kind:
                         continue
                     else:
@@ -206,7 +206,6 @@ def multiprocess():
 
 if __name__ == '__main__':
     multiprocess()
-    
     
 
 

@@ -1,12 +1,55 @@
 from enum import Enum
 import numpy as np
 import qingque_probability as prob
+import json as json
 
 class Action(Enum):
     BASIC = 1
     SKILL = 2
     ULT = 3
     END = 4
+
+'''
+Early ult (after skill). Look for >50% chance of succeess with current SP
+'''
+def probability_50(current_SP, qingque, enemy_count = 1, action_dict = None):
+    key = len(qingque.hand) * 1000 + prob.hand_check(qingque.hand)*100 + int(current_SP)*10
+    f = open('qingque_skill_probability.json', 'r')
+    data = json.loads(f.read())
+    f.close()
+    if key < 1000:
+        p = 0
+    else:
+        p = data[str(key)]
+    if len(action_dict[list(action_dict.keys())[-1]]) > 0 and action_dict[list(action_dict.keys())[-1]][-1] == Action.BASIC:
+        return Action.END
+    if p >= 0.5:
+        if current_SP >= 1 and prob.hand_check(qingque.hand) != 4:
+            return Action.SKILL
+    if qingque.energy >= 140:
+        return Action.ULT
+    return Action.BASIC
+
+def probability_40(current_SP, qingque, enemy_count = 1, action_dict = None):
+    key = len(qingque.hand) * 1000 + prob.hand_check(qingque.hand)*100 + int(current_SP)*10
+    f = open('qingque_skill_probability.json', 'r')
+    data = json.loads(f.read())
+    f.close()
+    if key < 1000:
+        p = 0
+    else:
+        p = data[str(key)]
+    if len(action_dict[list(action_dict.keys())[-1]]) > 0 and action_dict[list(action_dict.keys())[-1]][-1] == Action.BASIC:
+        return Action.END
+    if p >= 0.4:
+        if current_SP >= 1 and prob.hand_check(qingque.hand) != 4:
+            return Action.SKILL
+    if qingque.energy >= 140:
+        return Action.ULT
+    return Action.BASIC
+    
+
+
 '''
 Early ult (before skill), random skill/basic use. End after Basic
 '''
@@ -86,3 +129,7 @@ def skill_spam_ult_late(current_SP, qingque, enemy_count = 1, action_dict = None
         return Action.SKILL
     else:
         return Action.BASIC
+
+
+
+    
